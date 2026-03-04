@@ -24,4 +24,12 @@ class NodoAcotado(Nodo):
         super().__init__(estado, padre)
         self.operador=operador
         self.depth=depth
+        
+class NodoVoraz(Nodo):
+    def __init__(self, estado, padre, operador):
+        super().__init__(estado, padre)
+        self.operador = operador
+        self.heuristica = estado.heuristica()
+
+
 
