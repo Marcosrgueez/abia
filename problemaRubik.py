@@ -35,6 +35,15 @@ class EstadoRubik(Estado):
     def equals(self,e):
         return self.cubo.equals(e.cubo)
 
+    def heuristica(self):
+        mal_colocadas = 0
+        for cara in self.cubo.caras:
+            for i, casilla in enumerate(cara.casillas):
+                if i == 8:  # centro fijo
+                    continue
+                if casilla.color != cara.color:
+                    mal_colocadas += 1
+        return mal_colocadas
 
 # Implementa el interfaz Operador encapsulando un movimiento (giro) Rubik
 class OperadorRubik(Operador):
