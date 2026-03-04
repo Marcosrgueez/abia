@@ -11,6 +11,8 @@ class Busqueda(metaclass=ABCMeta):
     def buscarSolucion(self, inicial):
         pass
 
+##hola caracola
+
 
 
 #Implementa una búsqueda en Anchura genérica (independiente de Estados y Operadores) controlando repetición de estados.
