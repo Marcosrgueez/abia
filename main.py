@@ -5,6 +5,7 @@ from busqueda import *
 
 
 
+
 cubo = Cubo()
 
 print("CUBO INICIAL SIN MEZCLAR:\n" + cubo.visualizar())
@@ -31,7 +32,7 @@ print("CUBO INICIAL (MEZCLADO):\n" + cubo.visualizar())
 
 
 #Creación de un problema
-problema = Problema(EstadoRubik(cubo), BusquedaAnchura())
+problema = Problema(EstadoRubik(cubo), BusquedaVoraz())
 
 
 print("SOLUCION:")

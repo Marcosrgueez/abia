@@ -257,4 +257,55 @@ class BusquedaIterativa(Busqueda):
         
         return None # No hay solución para esta cota específica
 
+class BusquedaVoraz(Busqueda):
+    def buscarSolucion(self, inicial):
+        nodoActual = None
+        actual, hijo = None, None
+        solucion = False
+        abiertos = []
+        cerrados = dict()
 
+        # a�adir ESTADO_INICIAL a ABIERTOS
+        abiertos.append(NodoVoraz(inicial, None, None))
+
+        # inicializar CERRADOS a VACIO
+        while not solucion and len(abiertos) > 0:
+            # ACTUAL := primer nodo de ABIERTOS
+            nodoActual = abiertos.pop(0)
+            actual = nodoActual.estado
+
+            if actual.esFinal():
+                solucion = True
+            else:
+                # a�adir ACTUAL a CERRADOS
+                cerrados[actual.cubo.visualizar()] = actual
+
+                # expandir ACTUAL
+                for operador in actual.operadoresAplicables():
+                    # generar NUEVO_ESTADO aplicando OPERADOR
+                    hijo = actual.aplicarOperador(operador)
+                    idHijo = hijo.cubo.visualizar()
+
+                    # NUEVO_ESTADO no en ABIERTOS
+                    enAbiertos = False
+                    for nodo in abiertos:
+                        if nodo.estado.cubo.visualizar() == idHijo:
+                            enAbiertos = True
+                            break
+
+                    # NUEVO_ESTADO no en CERRADOS
+                    if not enAbiertos and idHijo not in cerrados.keys():
+                        # a�adir NUEVO_ESTADO en ABIERTOS
+                        abiertos.append(NodoVoraz(hijo, nodoActual, operador))
+                        # ordenar ABIERTOS por valor heuristico [h(e)]
+                        abiertos.sort(key=lambda x: x.heuristica)
+
+        if solucion:
+            lista = []
+            nodo = nodoActual
+            while nodo.padre != None:  # Asciende hasta la raiz
+                lista.insert(0, nodo.operador)
+                nodo = nodo.padre
+            return lista
+        else:
+            return None
