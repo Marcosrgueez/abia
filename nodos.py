@@ -20,7 +20,7 @@ class NodoAnchura(Nodo):
         self.operador=operador
 
 class NodoAcotado(Nodo):
-    def __init__(self, estado, padre, operador):
+    def __init__(self, estado, padre, operador, depth):
         super().__init__(estado, padre)
         self.operador=operador
         self.depth=depth

@@ -165,7 +165,96 @@ class BusquedaAEstrella(Busqueda):
             return lista
         else:
             return None
+        
+class BusquedaProfundidadAcotada(Busqueda):
+    
+    # Implementa la búsqueda en profundidad acotada (cota 6)
+    def buscarSolucion(self, inicial, cotaMax=6):
+        nodoActual = None
+        actual, hijo = None, None
+        solucion = False
+        abiertos = []
+        
+        # 1. Creamos el nodo raíz con profundidad (depth) 0
+        # Usamos tu clase NodoAcotado
+        abiertos.append(NodoAcotado(inicial, None, None, 0))
+        
+        while not solucion and len(abiertos) > 0:
+            # 2. LIFO: pop() saca el último elemento (comportamiento de Pila)
+            # Esto es lo que define a la búsqueda en Profundidad
+            nodoActual = abiertos.pop()
+            actual = nodoActual.estado
+            
+            # 3. Verificamos si el estado del cubo es el objetivo
+            if actual.esFinal():
+                solucion = True
+            else:
+                # 4. GESTIÓN DE LA COTA:
+                # Si el nodo actual tiene una profundidad menor que la cota, expandimos
+                if nodoActual.depth < cotaMax:
+                    for operador in actual.operadoresAplicables():
+                        hijo = actual.aplicarOperador(operador)
+                        
+                        # 5. Creamos el nodo hijo aumentando la profundidad en 1
+                        # Pasamos: estado, padre, operador, depth
+                        nuevoNodo = NodoAcotado(hijo, nodoActual, operador, nodoActual.depth + 1)
+                        abiertos.append(nuevoNodo)
+        
+        # 6. Reconstrucción del camino (si hay solución)
+        if solucion:
+            lista = []
+            nodo = nodoActual
+            while nodo.padre != None: 
+                lista.insert(0, nodo.operador)
+                nodo = nodo.padre
+            return lista
+        else:
+            return None
 
-
+class BusquedaIterativa(Busqueda):
+    
+    def buscarSolucion(self, inicial):
+        # La búsqueda iterativa va probando cotas crecientes
+        cota = 0
+        solucion = None
+        
+        # El bucle continúa hasta que se encuentre una solución
+        # (O podrías poner un límite máximo de seguridad, por ejemplo 20)
+        while solucion is None:
+            # Llamamos a un método auxiliar que hace la búsqueda acotada
+            solucion = self.busqueda_acotada(inicial, cota)
+            
+            if solucion is not None:
+                return solucion # Si la encuentra, la devuelve y termina
+            
+            # Si no hay solución con esta cota, incrementamos y repetimos
+            cota += 1
+            
+    # Este método es idéntico al que hicimos antes
+    def busqueda_acotada(self, inicial, cotaMax):
+        abiertos = []
+        # Usamos tu NodoAcotado
+        abiertos.append(NodoAcotado(inicial, None, None, 0))
+        
+        while len(abiertos) > 0:
+            nodoActual = abiertos.pop()
+            actual = nodoActual.estado
+            
+            if actual.esFinal():
+                # Reconstrucción del camino
+                lista = []
+                nodo = nodoActual
+                while nodo.padre != None: 
+                    lista.insert(0, nodo.operador)
+                    nodo = nodo.padre
+                return lista
+            
+            if nodoActual.depth < cotaMax:
+                for operador in actual.operadoresAplicables():
+                    hijo = actual.aplicarOperador(operador)
+                    nuevoNodo = NodoAcotado(hijo, nodoActual, operador, nodoActual.depth + 1)
+                    abiertos.append(nuevoNodo)
+        
+        return None # No hay solución para esta cota específica
 
 
