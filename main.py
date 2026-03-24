@@ -31,7 +31,7 @@ print("CUBO INICIAL (MEZCLADO):\n" + cubo.visualizar())
 
 
 #Creación de un problema
-problema = Problema(EstadoRubik(cubo), BusquedaIDAEstrella())
+problema = Problema(EstadoRubik(cubo), BusquedaAEstrellaWeighted())
 
 
 print("SOLUCION:")
