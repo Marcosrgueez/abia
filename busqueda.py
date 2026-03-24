@@ -58,7 +58,7 @@ class BusquedaProfundidad(Busqueda):
         solucion = False
         abiertos = []
         cerrados = dict()
-        abiertos.append(NodoProfundidad(inicial, None, None))
+        abiertos.append(NodoAcotado(inicial, None, None))
         cerrados[inicial.cubo.visualizar()]=inicial
         while not solucion and len(abiertos)>0:
             nodoActual = abiertos.pop()
