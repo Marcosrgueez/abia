@@ -401,53 +401,53 @@ class BusquedaIDAEstrella(Busqueda):
 
         return lista
     
-    class BusquedaAEstrellaWeighted(Busqueda):
+class BusquedaAEstrellaWeighted(Busqueda):
 
-        W = 1.5
+    W = 1.5
 
-        def heuristica(self, estado):
-            return 0
+    def heuristica(self, estado):
+        return 0
 
-        def buscarSolucion(self, inicial):
+    def buscarSolucion(self, inicial):
 
-            abiertos = []
-            cerrados = dict()
+        abiertos = []
+        cerrados = dict()
 
-            h0 = self.heuristica(inicial)
-            nodoInicial = NodoAEstrella(inicial, None, None, g=0, h=self.W * h0)
+        h0 = self.heuristica(inicial)
+        nodoInicial = NodoAEstrella(inicial, None, None, g=0, h=self.W * h0)
 
-            abiertos.append(nodoInicial)
-            cerrados[inicial.cubo.visualizar()] = 0
+        abiertos.append(nodoInicial)
+        cerrados[inicial.cubo.visualizar()] = 0
 
-            while len(abiertos) > 0:
+        while len(abiertos) > 0:
 
-                nodoActual = min(abiertos, key=lambda x: x.f)
-                abiertos.remove(nodoActual)
+            nodoActual = min(abiertos, key=lambda x: x.f)
+            abiertos.remove(nodoActual)
 
-                actual = nodoActual.estado
+            actual = nodoActual.estado
 
-                if actual.esFinal():
-                    return self.reconstruir(nodoActual)
+            if actual.esFinal():
+                return self.reconstruir(nodoActual)
 
-                for operador in actual.operadoresAplicables():
+            for operador in actual.operadoresAplicables():
 
-                    hijo_estado = actual.aplicarOperador(operador)
-                    g_hijo = nodoActual.g + 1
-                    id_hijo = hijo_estado.cubo.visualizar()
+                hijo_estado = actual.aplicarOperador(operador)
+                g_hijo = nodoActual.g + 1
+                id_hijo = hijo_estado.cubo.visualizar()
 
-                    if id_hijo not in cerrados or g_hijo < cerrados[id_hijo]:
+                if id_hijo not in cerrados or g_hijo < cerrados[id_hijo]:
 
-                        h_hijo = self.heuristica(hijo_estado)
-                        nodoHijo = NodoAEstrella(hijo_estado, nodoActual, operador, g=g_hijo, h=self.W * h_hijo)
+                    h_hijo = self.heuristica(hijo_estado)
+                    nodoHijo = NodoAEstrella(hijo_estado, nodoActual, operador, g=g_hijo, h=self.W * h_hijo)
 
-                        abiertos.append(nodoHijo)
-                        cerrados[id_hijo] = g_hijo
+                    abiertos.append(nodoHijo)
+                    cerrados[id_hijo] = g_hijo
 
-            return None
+        return None
 
-        def reconstruir(self, nodo):
-            lista = []
-            while nodo.padre is not None:
-                lista.insert(0, nodo.operador)
-                nodo = nodo.padre
-            return lista
+    def reconstruir(self, nodo):
+        lista = []
+        while nodo.padre is not None:
+            lista.insert(0, nodo.operador)
+            nodo = nodo.padre
+        return lista
