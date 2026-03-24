@@ -116,8 +116,12 @@ class BusquedaVoraz(Busqueda):
 class BusquedaAEstrella(Busqueda):
 
     def heuristica(self, estado):
-        return 0  # o tu heurística del cubo
-
+        mal = 0
+        for cara in estado.cubo.caras:
+            for casilla in cara.casillas:
+                if casilla.color != cara.color:
+                    mal += 1
+        return mal // 8
 
     def buscarSolucion(self, inicial):
 
@@ -406,7 +410,12 @@ class BusquedaAEstrellaWeighted(Busqueda):
     W = 1.5
 
     def heuristica(self, estado):
-        return 0
+        mal = 0
+        for cara in estado.cubo.caras:
+            for casilla in cara.casillas:
+                if casilla.color != cara.color:
+                    mal += 1
+        return mal // 8
 
     def buscarSolucion(self, inicial):
 
