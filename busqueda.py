@@ -11,7 +11,7 @@ class Busqueda(metaclass=ABCMeta):
     def buscarSolucion(self, inicial):
         pass
 
-##hola caracola
+
 
 
 
@@ -115,56 +115,56 @@ class BusquedaVoraz(Busqueda):
             return None
 class BusquedaAEstrella(Busqueda):
 
-    # h(n). Si no tienes heurística todavía, devuelve 0
     def heuristica(self, estado):
-        return 0
+        return 0  # o tu heurística del cubo
+
 
     def buscarSolucion(self, inicial):
-        nodoActual = None
-        actual, hijo = None, None
-        solucion = False
 
         abiertos = []
         cerrados = dict()
 
-        # En A*: cerrados guarda el mejor coste g de cada estado
-        abiertos.append(NodoAnchura(inicial, None, None))
+        h0 = self.heuristica(inicial)
+        nodoInicial = NodoAEstrella(inicial, None, None, 0, h0)
+
+        abiertos.append(nodoInicial)
         cerrados[inicial.cubo.visualizar()] = 0
 
-        while not solucion and len(abiertos) > 0:
+        while len(abiertos) > 0:
 
-            # Seleccionar el nodo de ABIERTOS con menor f = g + h
-            nodoActual = abiertos[0]
-            for nodo in abiertos[1:]:
-                f_nodo = cerrados[nodo.estado.cubo.visualizar()] + self.heuristica(nodo.estado)
-                f_actual = cerrados[nodoActual.estado.cubo.visualizar()] + self.heuristica(nodoActual.estado)
-                if f_nodo < f_actual:
-                    nodoActual = nodo
-
+            # Elegir nodo con menor f
+            nodoActual = min(abiertos, key=lambda x: x.f)
             abiertos.remove(nodoActual)
+
             actual = nodoActual.estado
 
             if actual.esFinal():
-                solucion = True
-            else:
-                for operador in actual.operadoresAplicables():
-                    hijo = actual.aplicarOperador(operador)
-                    g_hijo = cerrados[actual.cubo.visualizar()] + 1  # coste por movimiento = 1
+                return self.reconstruir(nodoActual)
 
-                    # Meter si es nuevo o si encontramos un camino mejor
-                    if (hijo.cubo.visualizar() not in cerrados.keys()) or (g_hijo < cerrados[hijo.cubo.visualizar()]):
-                        cerrados[hijo.cubo.visualizar()] = g_hijo
-                        abiertos.append(NodoAnchura(hijo, nodoActual, operador))
+            for operador in actual.operadoresAplicables():
 
-        if solucion:
-            lista = []
-            nodo = nodoActual
-            while nodo.padre != None:  # Asciende hasta la raíz
-                lista.insert(0, nodo.operador)
-                nodo = nodo.padre
-            return lista
-        else:
-            return None
+                hijo_estado = actual.aplicarOperador(operador)
+                g_hijo = nodoActual.g + 1
+
+                id_hijo = hijo_estado.cubo.visualizar()
+
+                if id_hijo not in cerrados or g_hijo < cerrados[id_hijo]:
+
+                    h_hijo = self.heuristica(hijo_estado)
+                    nodoHijo = NodoAEstrella(hijo_estado, nodoActual, operador, g_hijo, h_hijo)
+
+                    abiertos.append(nodoHijo)
+                    cerrados[id_hijo] = g_hijo
+
+        return None
+
+
+    def reconstruir(self, nodo):
+        lista = []
+        while nodo.padre is not None:
+            lista.insert(0, nodo.operador)
+            nodo = nodo.padre
+        return lista
         
 class BusquedaProfundidadAcotada(Busqueda):
     
