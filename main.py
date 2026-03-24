@@ -5,6 +5,7 @@ from busqueda import *
 
 
 
+
 cubo = Cubo()
 
 print("CUBO INICIAL SIN MEZCLAR:\n" + cubo.visualizar())
