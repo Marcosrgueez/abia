@@ -312,15 +312,10 @@ class BusquedaVoraz(Busqueda):
 class BusquedaIDAEstrella(Busqueda):
 
     # -------------------------------
-    # HEURÍSTICA (puedes mejorarla luego)
+    # HEURÍSTICA
     # -------------------------------
     def heuristica(self, estado):
-        mal = 0
-        for cara in estado.cubo.caras:
-            for casilla in cara.casillas:
-                if casilla.color != cara.color:
-                    mal += 1
-        return mal // 8
+        return estado.heuristica()  # usa la del EstadoRubik
 
 
     # -------------------------------
@@ -332,15 +327,12 @@ class BusquedaIDAEstrella(Busqueda):
         while True:
             resultado = self._busqueda(inicial, 0, limite, None, None)
 
-            # Si devuelve lista → solución encontrada
             if isinstance(resultado, list):
                 return resultado
 
-            # Si no hay solución
             if resultado == float('inf'):
                 return None
 
-            # Nueva cota
             limite = resultado
 
 
@@ -348,11 +340,14 @@ class BusquedaIDAEstrella(Busqueda):
     # BÚSQUEDA RECURSIVA (IDA*)
     # -------------------------------
     def _busqueda(self, estado, g, limite, padre, operador):
+
         f = g + self.heuristica(estado)
 
+        # poda por límite
         if f > limite:
             return f
 
+        # objetivo
         if estado.esFinal():
             return self._reconstruir_camino(padre, operador)
 
@@ -360,8 +355,12 @@ class BusquedaIDAEstrella(Busqueda):
 
         for op in estado.operadoresAplicables():
 
-            # Evitar deshacer el último movimiento
+            # evitar deshacer movimiento
             if operador is not None and self._es_inverso(op, operador):
+                continue
+
+            # evitar repetir misma cara
+            if operador is not None and (op.movimiento % 6 == operador.movimiento % 6):
                 continue
 
             hijo = estado.aplicarOperador(op)
@@ -378,14 +377,14 @@ class BusquedaIDAEstrella(Busqueda):
 
 
     # -------------------------------
-    # EVITAR MOVIMIENTO INVERSO
+    # DETECTAR MOVIMIENTO INVERSO
     # -------------------------------
     def _es_inverso(self, m1, m2):
-        return (m1 == m2 + 6) or (m2 == m1 + 6)
+        return abs(m1.movimiento - m2.movimiento) == 6
 
 
     # -------------------------------
-    # RECONSTRUIR SOLUCIÓN
+    # RECONSTRUIR CAMINO
     # -------------------------------
     def _reconstruir_camino(self, padre_info, operador_final):
         lista = []
@@ -400,7 +399,6 @@ class BusquedaIDAEstrella(Busqueda):
             padre_info = padre
 
         return lista
-    
     class BusquedaAEstrellaWeighted(Busqueda):
 
         W = 1.5
