@@ -226,6 +226,7 @@ class BusquedaIterativa(Busqueda):
         # (O podrías poner un límite máximo de seguridad, por ejemplo 20)
         while solucion is None:
             # Llamamos a un método auxiliar que hace la búsqueda acotada
+            BusquedaProfundidadAcotada(cota)
             solucion = self.busqueda_acotada(inicial, cota)
             
             if solucion is not None:

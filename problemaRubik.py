@@ -3,6 +3,7 @@
 
 from problema import *
 from cubo import *
+from heuristicas import heuristica_mal_colocadas
 
 
 # Objeto que implementa la interfaz Estado para un cubo Rubik concreto.
@@ -36,14 +37,7 @@ class EstadoRubik(Estado):
         return self.cubo.equals(e.cubo)
 
     def heuristica(self):
-        mal_colocadas = 0
-        for cara in self.cubo.caras:
-            for i, casilla in enumerate(cara.casillas):
-                if i == 8:  # centro fijo
-                    continue
-                if casilla.color != cara.color:
-                    mal_colocadas += 1
-        return mal_colocadas
+        return heuristica_mal_colocadas(self)
 
 # Implementa el interfaz Operador encapsulando un movimiento (giro) Rubik
 class OperadorRubik(Operador):
