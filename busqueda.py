@@ -152,7 +152,7 @@ class BusquedaAEstrella(Busqueda):
                 g_hijo = nodoActual.g + 1
 
                 id_hijo = hijo_estado.cubo.visualizar()
-
+                if
                 if id_hijo not in cerrados or g_hijo < cerrados[id_hijo]:
 
                     h_hijo = self.heuristica(hijo_estado)
@@ -179,7 +179,8 @@ class BusquedaProfundidadAcotada(Busqueda):
         actual, hijo = None, None
         solucion = False
         abiertos = []
-        
+        cerrados = dict() 
+        cerrados[inicial.cubo.visualizar()] = 0 #añadimos el estado inicial a cerrados para evitar que se vuelva a añadir a abiertos
         # 1. Creamos el nodo raíz con profundidad (depth) 0
         # Usamos tu clase NodoAcotado
         abiertos.append(NodoAcotado(inicial, None, None, 0))
@@ -189,22 +190,19 @@ class BusquedaProfundidadAcotada(Busqueda):
             # Esto es lo que define a la búsqueda en Profundidad
             nodoActual = abiertos.pop()
             actual = nodoActual.estado
-            
-            # 3. Verificamos si el estado del cubo es el objetivo
-            if actual.esFinal():
-                solucion = True
-            else:
-                # 4. GESTIÓN DE LA COTA:
-                # Si el nodo actual tiene una profundidad menor que la cota, expandimos
-                if nodoActual.depth < cotaMax:
+            if nodoActual.depth <= cotaMax:
+                # 3. Verificamos si el estado del cubo es el objetivo
+                if actual.esFinal():
+                    solucion = True
+                else:
+                    # 4. GESTIÓN DE LA COTA:
+                    # Si el nodo actual tiene una profundidad menor que la cota, expandimos
                     for operador in actual.operadoresAplicables():
                         hijo = actual.aplicarOperador(operador)
-                        
-                        # 5. Creamos el nodo hijo aumentando la profundidad en 1
-                        # Pasamos: estado, padre, operador, depth
-                        nuevoNodo = NodoAcotado(hijo, nodoActual, operador, nodoActual.depth + 1)
-                        abiertos.append(nuevoNodo)
-        
+                        if hijo.cubo.visualizar() not in cerrados.keys() or nodoActual.depth + 1 < cerrados[hijo.cubo.visualizar()]:
+                            abiertos.append(NodoAcotado(hijo, nodoActual, operador, nodoActual.depth + 1))
+                            cerrados[hijo.cubo.visualizar()] = nodoActual.depth + 1 #utilizamos CERRADOS para mantener también traza de los nodos añadidos a ABIERTOS
+            
         # 6. Reconstrucción del camino (si hay solución)
         if solucion:
             lista = []
@@ -227,8 +225,9 @@ class BusquedaIterativa(Busqueda):
         # (O podrías poner un límite máximo de seguridad, por ejemplo 20)
         while solucion is None:
             # Llamamos a un método auxiliar que hace la búsqueda acotada
-            BusquedaProfundidadAcotada(cota)
-            solucion = self.busqueda_acotada(inicial, cota)
+            
+            solucion = BusquedaProfundidadAcotada().buscarSolucion(inicial, cota)
+
             
             if solucion is not None:
                 return solucion # Si la encuentra, la devuelve y termina
@@ -320,100 +319,6 @@ class BusquedaVoraz(Busqueda):
             return None
 class BusquedaIDAEstrella(Busqueda):
 
-    # -------------------------------
-    # HEURÍSTICA (puedes mejorarla luego)
-    # -------------------------------
-    def __init__(self, heuristica_fn=heuristica_mal_colocadas):
-        self.heuristica_fn = heuristica_fn
-
-    def heuristica(self, estado):
-        return self.heuristica_fn(estado)
-
-
-    # -------------------------------
-    # MÉTODO PRINCIPAL
-    # -------------------------------
-    def buscarSolucion(self, inicial):
-        limite = self.heuristica(inicial)
-
-        while True:
-            resultado = self._busqueda(inicial, 0, limite, None, None, [])
-
-            # Si devuelve lista → solución encontrada
-            if isinstance(resultado, list):
-                return resultado
-
-            # Si no hay solución
-            if resultado == float('inf'):
-                return None
-
-            # Nueva cota
-            limite = resultado
-
-
-    # -------------------------------
-    # BÚSQUEDA RECURSIVA (IDA*)
-    # -------------------------------
-    def _busqueda(self, estado, g, limite, padre, operador, cerrados):
-        f = g + self.heuristica(estado)
-
-        if f > limite:
-            return f
-
-        if estado.esFinal():
-            return self._reconstruir_camino(padre, operador)
-
-        minimo = float('inf')
-
-        for op in estado.operadoresAplicables():
-
-            # Evitar repetir movimientos ya hechos
-            if op in cerrados:
-                continue
-
-            hijo = estado.aplicarOperador(op)
-
-            resultado = self._busqueda(
-                hijo,
-                g + 1,
-                limite,
-                (padre, operador),
-                op,
-                cerrados + [op]
-            )
-
-            if isinstance(resultado, list):
-                return resultado
-
-            if resultado < minimo:
-                minimo = resultado
-
-        return minimo
-
-
-    # -------------------------------
-    # EVITAR MOVIMIENTO INVERSO
-    # -------------------------------
-    def _es_inverso(self, m1, m2):
-        return (m1 == m2 + 6) or (m2 == m1 + 6)
-
-
-    # -------------------------------
-    # RECONSTRUIR SOLUCIÓN
-    # -------------------------------
-    def _reconstruir_camino(self, padre_info, operador_final):
-        lista = []
-
-        if operador_final is not None:
-            lista.insert(0, operador_final)
-
-        while padre_info is not None:
-            padre, op = padre_info
-            if op is not None:
-                lista.insert(0, op)
-            padre_info = padre
-
-        return lista
     
 class BusquedaAEstrellaWeighted(Busqueda):
 

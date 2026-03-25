@@ -1,7 +1,7 @@
 
 from random import *
 
-seed(76)
+seed(1019)
 
 #Clase que encapsula una cara del cubo de Rubik.
 #Cada cara tiene un color asociado (coincide con su índice en el array caras del objeto Cubo) y
