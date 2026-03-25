@@ -14,25 +14,28 @@ class Nodo:
 #Añade el Operador usado para generar el estado almacenado en este Nodo. 
 #Usado para simplificar la reconstrucción del camino solución.
 
+class Nodo:
+    def __init__(self, estado, padre):
+        self.estado = estado
+        self.padre = padre
+
 class NodoAnchura(Nodo):
     def __init__(self, estado, padre, operador):
         super().__init__(estado, padre)
-        self.operador=operador
+        self.operador = operador
 
 class NodoAcotado(Nodo):
     def __init__(self, estado, padre, operador, depth):
         super().__init__(estado, padre)
-        self.operador=operador
-        self.depth=depth
-        
+        self.operador = operador
+        self.depth = depth
+
 class NodoVoraz(Nodo):
-    def __init__(self, estado, padre, operador, heuristica_fn=None):
+    def __init__(self, estado, padre, operador):
         super().__init__(estado, padre)
         self.operador = operador
-        if heuristica_fn is None:
-            self.heuristica = estado.heuristica()
-        else:
-            self.heuristica = heuristica_fn(estado)
+        self.heuristica = estado.heuristica()
+
 class NodoAEstrella(Nodo):
     def __init__(self, estado, padre, operador, g, h):
         super().__init__(estado, padre)
@@ -40,6 +43,3 @@ class NodoAEstrella(Nodo):
         self.g = g
         self.h = h
         self.f = g + h
-
-
-
