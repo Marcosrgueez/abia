@@ -2,7 +2,7 @@ import sys
 from cubo import *
 from problemaRubik import *
 from busqueda import *
-from heuristicas import heuristica_mal_colocadas, heuristica_cruz_up, heuristica_cero
+from heuristicas import heuristica_mal_colocadas, heuristica_cruz_up
 
 
 
