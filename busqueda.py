@@ -1,4 +1,5 @@
 from nodos import *
+from heuristicas import heuristica_mal_colocadas
 
 
 from abc import abstractmethod
@@ -83,13 +84,16 @@ class BusquedaProfundidad(Busqueda):
             return None
 
 class BusquedaVoraz(Busqueda):
+    def __init__(self, heuristica_fn=heuristica_mal_colocadas):
+        self.heuristica_fn = heuristica_fn
+
     def buscarSolucion(self,inicial):
         nodoActual = None
         actual, hijo = None, None
         solucion = False
         abiertos = []
         cerrados = dict()
-        abiertos.append(NodoVoraz(inicial, None, None))
+        abiertos.append(NodoVoraz(inicial, None, None, self.heuristica_fn))
         cerrados[inicial.cubo.visualizar()]=inicial
         while not solucion and len(abiertos)>0:
             nodoActual = abiertos.pop(0)
@@ -101,7 +105,7 @@ class BusquedaVoraz(Busqueda):
                 for operador in actual.operadoresAplicables():
                     hijo = actual.aplicarOperador(operador)
                     if hijo.cubo.visualizar() not in cerrados.keys():
-                        abiertos.append(NodoVoraz(hijo, nodoActual, operador))
+                        abiertos.append(NodoVoraz(hijo, nodoActual, operador, self.heuristica_fn))
                         cerrados[hijo.cubo.visualizar()] = hijo #utilizamos CERRADOS para mantener también traza de los nodos añadidos a ABIERTOS 
                         abiertos.sort(key=lambda x: x.heuristica) #ordenamos ABIERTOS por heurística (menor primero)
         if solucion:
@@ -114,14 +118,11 @@ class BusquedaVoraz(Busqueda):
         else:
             return None
 class BusquedaAEstrella(Busqueda):
+    def __init__(self, heuristica_fn=heuristica_mal_colocadas):
+        self.heuristica_fn = heuristica_fn
 
     def heuristica(self, estado):
-        mal = 0
-        for cara in estado.cubo.caras:
-            for casilla in cara.casillas:
-                if casilla.color != cara.color:
-                    mal += 1
-        return mal // 8
+        return self.heuristica_fn(estado)
 
     def buscarSolucion(self, inicial):
 
@@ -263,6 +264,9 @@ class BusquedaIterativa(Busqueda):
         return None # No hay solución para esta cota específica
 
 class BusquedaVoraz(Busqueda):
+    def __init__(self, heuristica_fn=heuristica_mal_colocadas):
+        self.heuristica_fn = heuristica_fn
+
     def buscarSolucion(self, inicial):
         nodoActual = None
         actual, hijo = None, None
@@ -271,7 +275,7 @@ class BusquedaVoraz(Busqueda):
         cerrados = dict()
 
         # a�adir ESTADO_INICIAL a ABIERTOS
-        abiertos.append(NodoVoraz(inicial, None, None))
+        abiertos.append(NodoVoraz(inicial, None, None, self.heuristica_fn))
 
         # inicializar CERRADOS a VACIO
         while not solucion and len(abiertos) > 0:
@@ -301,7 +305,7 @@ class BusquedaVoraz(Busqueda):
                     # NUEVO_ESTADO no en CERRADOS
                     if not enAbiertos and idHijo not in cerrados.keys():
                         # a�adir NUEVO_ESTADO en ABIERTOS
-                        abiertos.append(NodoVoraz(hijo, nodoActual, operador))
+                        abiertos.append(NodoVoraz(hijo, nodoActual, operador, self.heuristica_fn))
                         # ordenar ABIERTOS por valor heuristico [h(e)]
                         abiertos.sort(key=lambda x: x.heuristica)
 
@@ -319,13 +323,11 @@ class BusquedaIDAEstrella(Busqueda):
     # -------------------------------
     # HEURÍSTICA (puedes mejorarla luego)
     # -------------------------------
+    def __init__(self, heuristica_fn=heuristica_mal_colocadas):
+        self.heuristica_fn = heuristica_fn
+
     def heuristica(self, estado):
-        mal = 0
-        for cara in estado.cubo.caras:
-            for casilla in cara.casillas:
-                if casilla.color != cara.color:
-                    mal += 1
-        return mal // 8
+        return self.heuristica_fn(estado)
 
 
     # -------------------------------
@@ -335,7 +337,7 @@ class BusquedaIDAEstrella(Busqueda):
         limite = self.heuristica(inicial)
 
         while True:
-            resultado = self._busqueda(inicial, 0, limite, None, None)
+            resultado = self._busqueda(inicial, 0, limite, None, None, [])
 
             # Si devuelve lista → solución encontrada
             if isinstance(resultado, list):
@@ -352,7 +354,7 @@ class BusquedaIDAEstrella(Busqueda):
     # -------------------------------
     # BÚSQUEDA RECURSIVA (IDA*)
     # -------------------------------
-    def _busqueda(self, estado, g, limite, padre, operador):
+    def _busqueda(self, estado, g, limite, padre, operador, cerrados):
         f = g + self.heuristica(estado)
 
         if f > limite:
@@ -365,13 +367,20 @@ class BusquedaIDAEstrella(Busqueda):
 
         for op in estado.operadoresAplicables():
 
-            # Evitar deshacer el último movimiento
-            if operador is not None and self._es_inverso(op, operador):
+            # Evitar repetir movimientos ya hechos
+            if op in cerrados:
                 continue
 
             hijo = estado.aplicarOperador(op)
 
-            resultado = self._busqueda(hijo, g + 1, limite, (padre, operador), op)
+            resultado = self._busqueda(
+                hijo,
+                g + 1,
+                limite,
+                (padre, operador),
+                op,
+                cerrados + [op]
+            )
 
             if isinstance(resultado, list):
                 return resultado
@@ -410,13 +419,11 @@ class BusquedaAEstrellaWeighted(Busqueda):
 
     W = 1.5
 
+    def __init__(self, heuristica_fn=heuristica_mal_colocadas):
+        self.heuristica_fn = heuristica_fn
+
     def heuristica(self, estado):
-        mal = 0
-        for cara in estado.cubo.caras:
-            for casilla in cara.casillas:
-                if casilla.color != cara.color:
-                    mal += 1
-        return mal // 8
+        return self.heuristica_fn(estado)
 
     def buscarSolucion(self, inicial):
 

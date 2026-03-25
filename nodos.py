@@ -26,10 +26,13 @@ class NodoAcotado(Nodo):
         self.depth=depth
         
 class NodoVoraz(Nodo):
-    def __init__(self, estado, padre, operador):
+    def __init__(self, estado, padre, operador, heuristica_fn=None):
         super().__init__(estado, padre)
         self.operador = operador
-        self.heuristica = estado.heuristica()
+        if heuristica_fn is None:
+            self.heuristica = estado.heuristica()
+        else:
+            self.heuristica = heuristica_fn(estado)
 class NodoAEstrella(Nodo):
     def __init__(self, estado, padre, operador, g, h):
         super().__init__(estado, padre)

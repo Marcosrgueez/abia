@@ -2,6 +2,7 @@ import sys
 from cubo import *
 from problemaRubik import *
 from busqueda import *
+from heuristicas import heuristica_mal_colocadas, heuristica_cruz_up, heuristica_cero
 
 
 
@@ -18,6 +19,15 @@ print("CUBO resultado del movimiento F:\n" + cubo.visualizar())
 
 movs=int(sys.argv[1])
 
+heuristicas = {
+    "mal": heuristica_mal_colocadas,
+    "cruz": heuristica_cruz_up
+}
+
+heuristica = heuristica_mal_colocadas
+if len(sys.argv) > 2:
+    heuristica = heuristicas.get(sys.argv[2], heuristica_mal_colocadas)
+
 movsMezcla = cubo.mezclar(movs)
 
 print("MOVIMIENTOS ALEATORIOS:",movs)
@@ -32,7 +42,7 @@ print("CUBO INICIAL (MEZCLADO):\n" + cubo.visualizar())
 
 
 #Creación de un problema
-problema = Problema(EstadoRubik(cubo), BusquedaAEstrellaWeighted())
+problema = Problema(EstadoRubik(cubo), BusquedaAEstrellaWeighted(heuristica))
 
 
 print("SOLUCION:")
