@@ -147,19 +147,15 @@ class BusquedaAEstrella(Busqueda):
                 return self.reconstruir(nodoActual)
 
             for operador in actual.operadoresAplicables():
-
                 hijo_estado = actual.aplicarOperador(operador)
                 g_hijo = nodoActual.g + 1
-
                 id_hijo = hijo_estado.cubo.visualizar()
-                if
-                if id_hijo not in cerrados or g_hijo < cerrados[id_hijo]:
 
+                if id_hijo not in cerrados or g_hijo < cerrados[id_hijo]:
+                    cerrados[id_hijo] = g_hijo
                     h_hijo = self.heuristica(hijo_estado)
                     nodoHijo = NodoAEstrella(hijo_estado, nodoActual, operador, g_hijo, h_hijo)
-
                     abiertos.append(nodoHijo)
-                    cerrados[id_hijo] = g_hijo
 
         return None
 
@@ -318,7 +314,7 @@ class BusquedaVoraz(Busqueda):
         else:
             return None
 class BusquedaIDAEstrella(Busqueda):
-
+    pass
     
 class BusquedaAEstrellaWeighted(Busqueda):
 
@@ -352,19 +348,15 @@ class BusquedaAEstrellaWeighted(Busqueda):
                 return self.reconstruir(nodoActual)
 
             for operador in actual.operadoresAplicables():
-
                 hijo_estado = actual.aplicarOperador(operador)
                 g_hijo = nodoActual.g + 1
                 id_hijo = hijo_estado.cubo.visualizar()
 
                 if id_hijo not in cerrados or g_hijo < cerrados[id_hijo]:
-
-                    h_hijo = self.heuristica(hijo_estado)
-                    nodoHijo = NodoAEstrella(hijo_estado, nodoActual, operador, g=g_hijo, h=self.W * h_hijo)
-
-                    abiertos.append(nodoHijo)
                     cerrados[id_hijo] = g_hijo
-
+                    h_hijo = self.heuristica(hijo_estado)
+                    nodoHijo = NodoAEstrella(hijo_estado, nodoActual, operador, g_hijo, h_hijo)
+                    abiertos.append(nodoHijo)
         return None
 
     def reconstruir(self, nodo):
