@@ -314,7 +314,53 @@ class BusquedaVoraz(Busqueda):
         else:
             return None
 class BusquedaIDAEstrella(Busqueda):
-    pass
+
+    def __init__(self, heuristica_fn=heuristica_mal_colocadas):
+        self.heuristica_fn = heuristica_fn
+
+    def heuristica(self, estado):
+        return self.heuristica_fn(estado)
+
+    def buscarSolucion(self, inicial):
+        cota = self.heuristica(inicial)  # ← único cambio: la cota inicial es h(inicial), no 0
+        solucion = None
+
+        while solucion is None:
+            solucion = self.busqueda_acotada(inicial, cota)
+
+            if solucion is not None:
+                return solucion
+
+            cota += 1  # ← en IDA* puro esto sería el mínimo f que superó la cota, pero +1 es válido
+
+        return None
+
+    def busqueda_acotada(self, inicial, cotaMax):
+        abiertos = []
+        abiertos.append(NodoAcotado(inicial, None, None, 0))
+
+        while len(abiertos) > 0:
+            nodoActual = abiertos.pop()
+            actual = nodoActual.estado
+
+            if actual.esFinal():
+                lista = []
+                nodo = nodoActual
+                while nodo.padre is not None:
+                    lista.insert(0, nodo.operador)
+                    nodo = nodo.padre
+                return lista
+
+            g_actual = nodoActual.depth
+            f_actual = g_actual + self.heuristica(actual)  # ← único cambio respecto a BusquedaIterativa
+
+            if f_actual <= cotaMax:
+                for operador in actual.operadoresAplicables():
+                    hijo = actual.aplicarOperador(operador)
+                    nuevoNodo = NodoAcotado(hijo, nodoActual, operador, g_actual + 1)
+                    abiertos.append(nuevoNodo)
+
+        return None
     
 class BusquedaAEstrellaWeighted(Busqueda):
 
