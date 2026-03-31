@@ -20,31 +20,46 @@ class Busqueda(metaclass=ABCMeta):
 #Usa lista ABIERTOS (lista) y lista CERRADOS (diccionario usando Estado como clave)
 class BusquedaAnchura(Busqueda):
     
-    #Implementa la búsqueda en anchura. Si encuentra solución recupera la lista de Operadores empleados almacenada en los atributos de los objetos NodoAnchura
-    def buscarSolucion(self,inicial):
+    def buscarSolucion(self, inicial):
         nodoActual = None
         actual, hijo = None, None
         solucion = False
         abiertos = []
         cerrados = dict()
+
+        #  métricas
+        max_abiertos = 0
+
         abiertos.append(NodoAnchura(inicial, None, None))
-        cerrados[inicial.cubo.visualizar()]=inicial
-        while not solucion and len(abiertos)>0:
+        cerrados[inicial.cubo.visualizar()] = inicial
+
+        while not solucion and len(abiertos) > 0:
             nodoActual = abiertos.pop(0)
             actual = nodoActual.estado
+
+            #  actualizar tamaño máximo de abiertos
+            if len(abiertos) > max_abiertos:
+                max_abiertos = len(abiertos)
+
             if actual.esFinal():
                 solucion = True
             else:
-                #cerrados[actual.cubo.visualizar()] = actual
                 for operador in actual.operadoresAplicables():
                     hijo = actual.aplicarOperador(operador)
-                    if hijo.cubo.visualizar() not in cerrados.keys():
+                    clave = hijo.cubo.visualizar()
+
+                    if clave not in cerrados:
                         abiertos.append(NodoAnchura(hijo, nodoActual, operador))
-                        cerrados[hijo.cubo.visualizar()] = hijo #utilizamos CERRADOS para mantener también traza de los nodos añadidos a ABIERTOS 
+                        cerrados[clave] = hijo
+
+        #  guardar métricas
+        self.nodos_explorados = len(cerrados)
+        self.max_abiertos = max_abiertos
+
         if solucion:
             lista = []
             nodo = nodoActual
-            while nodo.padre != None: #Asciende hasta la raíz
+            while nodo.padre != None:
                 lista.insert(0, nodo.operador)
                 nodo = nodo.padre
             return lista
@@ -170,45 +185,56 @@ class BusquedaAEstrella(Busqueda):
 class BusquedaProfundidadAcotada(Busqueda):
     
     # Implementa la búsqueda en profundidad acotada (cota 6)
-    def buscarSolucion(self, inicial, cotaMax=6):
-        nodoActual = None
-        actual, hijo = None, None
-        solucion = False
-        abiertos = []
-        cerrados = dict() 
-        cerrados[inicial.cubo.visualizar()] = 0 #añadimos el estado inicial a cerrados para evitar que se vuelva a añadir a abiertos
-        # 1. Creamos el nodo raíz con profundidad (depth) 0
-        # Usamos tu clase NodoAcotado
-        abiertos.append(NodoAcotado(inicial, None, None, 0))
-        
-        while not solucion and len(abiertos) > 0:
-            # 2. LIFO: pop() saca el último elemento (comportamiento de Pila)
-            # Esto es lo que define a la búsqueda en Profundidad
-            nodoActual = abiertos.pop()
-            actual = nodoActual.estado
-            if nodoActual.depth <= cotaMax:
-                # 3. Verificamos si el estado del cubo es el objetivo
-                if actual.esFinal():
-                    solucion = True
-                else:
-                    # 4. GESTIÓN DE LA COTA:
-                    # Si el nodo actual tiene una profundidad menor que la cota, expandimos
-                    for operador in actual.operadoresAplicables():
-                        hijo = actual.aplicarOperador(operador)
-                        if hijo.cubo.visualizar() not in cerrados.keys() or nodoActual.depth + 1 < cerrados[hijo.cubo.visualizar()]:
-                            abiertos.append(NodoAcotado(hijo, nodoActual, operador, nodoActual.depth + 1))
-                            cerrados[hijo.cubo.visualizar()] = nodoActual.depth + 1 #utilizamos CERRADOS para mantener también traza de los nodos añadidos a ABIERTOS
-            
-        # 6. Reconstrucción del camino (si hay solución)
-        if solucion:
-            lista = []
-            nodo = nodoActual
-            while nodo.padre != None: 
-                lista.insert(0, nodo.operador)
-                nodo = nodo.padre
-            return lista
-        else:
-            return None
+    class BusquedaProfundidadAcotada(Busqueda):
+    
+    # Implementa la búsqueda en profundidad acotada (cota 6)
+        def buscarSolucion(self, inicial, cotaMax=6):
+            nodoActual = None
+            actual, hijo = None, None
+            solucion = False
+            abiertos = []
+            cerrados = dict() 
+            cerrados[inicial.cubo.visualizar()] = 0 # añadimos el estado inicial a cerrados para evitar que se vuelva a añadir a abiertos
+            # Creamos el nodo raíz con profundidad (depth) 0
+            # Usamos la clase NodoAcotado
+            abiertos.append(NodoAcotado(inicial, None, None, 0))
+
+            # Contadores para memoria / evaluación
+            self.nodos_explorados = 0
+            self.max_abiertos = 0
+
+            while not solucion and len(abiertos) > 0:
+                # LIFO: pop() saca el último elemento (comportamiento de Pila)
+                nodoActual = abiertos.pop()
+                actual = nodoActual.estado
+
+                # Nodo explorado
+                self.nodos_explorados += 1
+                # Profundidad máxima alcanzada
+                if nodoActual.depth > self.max_abiertos:
+                    self.max_abiertos = nodoActual.depth
+
+                if nodoActual.depth <= cotaMax:
+                    if actual.esFinal():
+                        solucion = True
+                    else:
+                        # Expandir nodos si profundidad menor que cota
+                        for operador in actual.operadoresAplicables():
+                            hijo = actual.aplicarOperador(operador)
+                            if hijo.cubo.visualizar() not in cerrados.keys() or nodoActual.depth + 1 < cerrados[hijo.cubo.visualizar()]:
+                                abiertos.append(NodoAcotado(hijo, nodoActual, operador, nodoActual.depth + 1))
+                                cerrados[hijo.cubo.visualizar()] = nodoActual.depth + 1
+
+            # Reconstrucción del camino
+            if solucion:
+                lista = []
+                nodo = nodoActual
+                while nodo.padre != None: 
+                    lista.insert(0, nodo.operador)
+                    nodo = nodo.padre
+                return lista
+            else:
+                return None
 
 class BusquedaIterativa(Busqueda):
     
@@ -299,7 +325,7 @@ class BusquedaVoraz(Busqueda):
 
                     # NUEVO_ESTADO no en CERRADOS
                     if not enAbiertos and idHijo not in cerrados.keys():
-                        # a�adir NUEVO_ESTADO en ABIERTOS
+                        # añadir NUEVO_ESTADO en ABIERTOS
                         abiertos.append(NodoVoraz(hijo, nodoActual, operador, self.heuristica_fn))
                         # ordenar ABIERTOS por valor heuristico [h(e)]
                         abiertos.sort(key=lambda x: x.heuristica)
