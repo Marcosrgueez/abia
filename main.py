@@ -1,3 +1,4 @@
+
 import sys
 from cubo import *
 from problemaRubik import *
@@ -54,5 +55,3 @@ if opsSolucion != None:
     print("CUBO FINAL:\n" + cubo.visualizar())
 else:
     print("no se ha encontrado solución")
-
-
