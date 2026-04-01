@@ -1,6 +1,6 @@
 
 
-#Nodos a almacenar como parte de los algoritmos de búsqueda
+#Nodos que tenemos que almacenar como parte de los algoritmos de búsqueda que implementamos.
 
 class Nodo:
     def __init__(self, estado, padre):
@@ -10,9 +10,9 @@ class Nodo:
 
 
 
-#Nodos usados por la BusquedaAnchura. 
+#Nodos que   la BusquedaAnchura usó. 
 #Añade el Operador usado para generar el estado almacenado en este Nodo. 
-#Usado para simplificar la reconstrucción del camino solución.
+#Lo utilizamos para simplificar la reconstrucción del camino solución.
 
 class NodoAnchura(Nodo):
     def __init__(self, estado, padre, operador):
@@ -29,7 +29,7 @@ class NodoVoraz(Nodo):
     def __init__(self, estado, padre, operador, heuristica_fn):
         super().__init__(estado, padre)
         self.operador = operador
-        self.heuristica = heuristica_fn(estado)  # ← con (estado), llamando a la función
+        self.heuristica = heuristica_fn(estado)  
 
 class NodoAEstrella(Nodo):
     def __init__(self, estado, padre, operador, g, h):

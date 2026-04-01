@@ -4,8 +4,8 @@ def _extraer_cubo(estado_o_cubo):
     return estado_o_cubo
 
 
-def heuristica_mal_colocadas(estado_o_cubo):
-    cubo = _extraer_cubo(estado_o_cubo)
+def heuristica_mal_colocadas(estado_cubo):
+    cubo = _extraer_cubo(estado_cubo)
     mal = 0
     for cara in cubo.caras:
         for i, casilla in enumerate(cara.casillas):
@@ -18,12 +18,12 @@ def heuristica_mal_colocadas(estado_o_cubo):
 
 
 
-def heuristica_cruz_up(estado_o_cubo):
-    cubo = _extraer_cubo(estado_o_cubo)
+def heuristica_cruz_up(estado_cubo):
+    cubo = _extraer_cubo(estado_cubo)
     cara_up = cubo.caras[0]
     indices_aristas = [1, 3, 5, 7]
-    correctas = 0
+    aciertos = 0
     for idx in indices_aristas:
         if cara_up.casillas[idx].color == cara_up.color:
-            correctas += 1
-    return 4 - correctas
+            aciertos += 1
+    return 4 - aciertos

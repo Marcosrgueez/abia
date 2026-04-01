@@ -1,53 +1,46 @@
-#Interfaz genérico para los estados del espacio de estados
+# Interfaz base para representar estados dentro de un problema de búsqueda
 from abc import abstractmethod
 from abc import ABCMeta
 
 
-
-
 class Estado(metaclass=ABCMeta):
-    #Devuelve el Vector con la lista de Operadores aplicables sobre este Estado
+    # Devuelve la lista de operadores que se pueden aplicar en este estado
     @abstractmethod
     def operadoresAplicables(self):
         pass
 
-    #Indica si este es un estado final (solución)
+    # Indica si este estado ya es solución (estado final)
     @abstractmethod
     def esFinal(self):
         pass
 
+    # Genera un nuevo estado al aplicar un operador sobre el estado actual
     @abstractmethod
-    #Genera un nuevo Estado resultante de aplicar el Operador indicado
     def aplicarOperador(self,operador):
         pass
 
 
-
-
-#Interfaz para encapsular operadores
+# Interfaz base para representar operadores (acciones)
 class Operador(metaclass=ABCMeta):
+    # Devuelve el nombre o etiqueta del operador
     @abstractmethod
     def getEtiqueta(self):
         pass
 
+    # Devuelve el coste de aplicar el operador
     @abstractmethod
     def getCoste(self):
         pass
 
 
-
-
-# Clase genérica (indepeniente de estados y algoritmos concretos) que representa un problema de búsqueda en espacio de estados.
-# Está caracterizado por un Estado inicial y un método de Busqueda
+# Clase genérica que representa un problema de búsqueda.
+# Tiene un estado inicial y un algoritmo de búsqueda asociado.
 class Problema:
     def __init__(self,inicial,buscador):
         self.inicial=inicial
         self.buscador=buscador
 
-
-
-    #Aplica el método de Busqueda de este Problema concreto para resolverlo. 
-    #Devuelve la lista de Operadores que permiten alcanzar un Estado final desde el Estado inicial del Problema
+    # Ejecuta el algoritmo de búsqueda para resolver el problema.
+    # Devuelve la secuencia de operadores que llevan desde el estado inicial a uno final.
     def obtenerSolucion(self):
         return self.buscador.buscarSolucion(self.inicial)
-
