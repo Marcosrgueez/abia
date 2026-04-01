@@ -29,7 +29,7 @@ class NodoVoraz(Nodo):
     def __init__(self, estado, padre, operador, heuristica_fn):
         super().__init__(estado, padre)
         self.operador = operador
-        self.heuristica = heuristica_fn(estado)
+        self.heuristica = heuristica_fn(estado)  # ← con (estado), llamando a la función
 
 class NodoAEstrella(Nodo):
     def __init__(self, estado, padre, operador, g, h):
