@@ -300,6 +300,7 @@ class BusquedaIDAEstrella(Busqueda):
         return None
 
 
+<<<<<<< HEAD
 class BusquedaAEstrellaWeighted(Busqueda):
 
     W = 1.5
@@ -328,26 +329,144 @@ class BusquedaAEstrellaWeighted(Busqueda):
             self.nodos_explorados += 1
             if len(abiertos) > self.max_abiertos:
                 self.max_abiertos = len(abiertos)
+=======
+    # -------------------------------
+    # MÉTODO PRINCIPAL
+    # -------------------------------
+    def buscarSolucion(self, inicial):
+        limite = self.heuristica(inicial)
 
-            if actual.esFinal():
-                return self.reconstruir(nodoActual)
+        while True:
+            resultado = self._busqueda(inicial, 0, limite, None, None)
 
-            for operador in actual.operadoresAplicables():
-                hijo_estado = actual.aplicarOperador(operador)
-                g_hijo = nodoActual.g + 1
-                id_hijo = hijo_estado.cubo.visualizar()
+            if isinstance(resultado, list):
+                return resultado
 
+            if resultado == float('inf'):
+                return None
+
+            limite = resultado
+
+
+    # -------------------------------
+    # BÚSQUEDA RECURSIVA (IDA*)
+    # -------------------------------
+    def _busqueda(self, estado, g, limite, padre, operador):
+
+        f = g + self.heuristica(estado)
+
+        # poda por límite
+        if f > limite:
+            return f
+
+        # objetivo
+        if estado.esFinal():
+            return self._reconstruir_camino(padre, operador)
+
+        minimo = float('inf')
+
+        for op in estado.operadoresAplicables():
+
+            # evitar deshacer movimiento
+            if operador is not None and self._es_inverso(op, operador):
+                continue
+
+            # evitar repetir misma cara
+            if operador is not None and (op.movimiento % 6 == operador.movimiento % 6):
+                continue
+
+            hijo = estado.aplicarOperador(op)
+
+            resultado = self._busqueda(hijo, g + 1, limite, (padre, operador), op)
+
+            if isinstance(resultado, list):
+                return resultado
+
+            if resultado < minimo:
+                minimo = resultado
+
+        return minimo
+
+
+    # -------------------------------
+    # DETECTAR MOVIMIENTO INVERSO
+    # -------------------------------
+    def _es_inverso(self, m1, m2):
+        return abs(m1.movimiento - m2.movimiento) == 6
+
+
+    # -------------------------------
+    # RECONSTRUIR CAMINO
+    # -------------------------------
+    def _reconstruir_camino(self, padre_info, operador_final):
+        lista = []
+
+        if operador_final is not None:
+            lista.insert(0, operador_final)
+
+        while padre_info is not None:
+            padre, op = padre_info
+            if op is not None:
+                lista.insert(0, op)
+            padre_info = padre
+
+        return lista
+    class BusquedaAEstrellaWeighted(Busqueda):
+
+        W = 1.5
+
+        def heuristica(self, estado):
+            return 0
+
+        def buscarSolucion(self, inicial):
+
+            abiertos = []
+            cerrados = dict()
+
+            h0 = self.heuristica(inicial)
+            nodoInicial = NodoAEstrella(inicial, None, None, g=0, h=self.W * h0)
+
+            abiertos.append(nodoInicial)
+            cerrados[inicial.cubo.visualizar()] = 0
+>>>>>>> parent of 2530a41 (CAMBIO)
+
+            while len(abiertos) > 0:
+
+                nodoActual = min(abiertos, key=lambda x: x.f)
+                abiertos.remove(nodoActual)
+
+<<<<<<< HEAD
                 if id_hijo not in cerrados or g_hijo < cerrados[id_hijo]:
                     cerrados[id_hijo] = g_hijo
                     h_hijo = self.heuristica(hijo_estado)
                     nodoHijo = NodoAEstrella(hijo_estado, nodoActual, operador, g_hijo, self.W * h_hijo)
                     abiertos.append(nodoHijo)
+=======
+                actual = nodoActual.estado
+>>>>>>> parent of 2530a41 (CAMBIO)
 
-        return None
+                if actual.esFinal():
+                    return self.reconstruir(nodoActual)
 
-    def reconstruir(self, nodo):
-        lista = []
-        while nodo.padre is not None:
-            lista.insert(0, nodo.operador)
-            nodo = nodo.padre
-        return lista
+                for operador in actual.operadoresAplicables():
+
+                    hijo_estado = actual.aplicarOperador(operador)
+                    g_hijo = nodoActual.g + 1
+                    id_hijo = hijo_estado.cubo.visualizar()
+
+                    if id_hijo not in cerrados or g_hijo < cerrados[id_hijo]:
+
+                        h_hijo = self.heuristica(hijo_estado)
+                        nodoHijo = NodoAEstrella(hijo_estado, nodoActual, operador, g=g_hijo, h=self.W * h_hijo)
+
+                        abiertos.append(nodoHijo)
+                        cerrados[id_hijo] = g_hijo
+
+            return None
+
+        def reconstruir(self, nodo):
+            lista = []
+            while nodo.padre is not None:
+                lista.insert(0, nodo.operador)
+                nodo = nodo.padre
+            return lista
