@@ -1,4 +1,4 @@
-# --- Estructuras de datos para el árbol de búsqueda ---
+
 
 class Nodo:
     """Clase base para representar un estado en el árbol de exploración."""
