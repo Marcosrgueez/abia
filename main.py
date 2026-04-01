@@ -36,15 +36,7 @@ if len(sys.argv) > 2:
 busqueda = BusquedaAEstrellaWeighted(heuristica)
 problema = Problema(EstadoRubik(cubo), busqueda)
 
-<<<<<<< HEAD
 inicio = time.time()
-=======
-
-#Creación de un problema
-problema = Problema(EstadoRubik(cubo), BusquedaIDAEstrella())
-
-
->>>>>>> parent of 2530a41 (CAMBIO)
 print("SOLUCION:")
 opsSolucion = problema.obtenerSolucion()
 fin = time.time()
